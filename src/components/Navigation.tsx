@@ -9,9 +9,18 @@ interface NavigationProps {
     company?: any;
   };
   onLogout?: () => void;
+  onNavigateToBuilder?: () => void;
+  onNavigateToHome?: () => void;
+  currentView?: 'home' | 'builder';
 }
 
-const Navigation: React.FC<NavigationProps> = ({ user, onLogout }) => {
+const Navigation: React.FC<NavigationProps> = ({
+  user,
+  onLogout,
+  onNavigateToBuilder,
+  onNavigateToHome,
+  currentView
+}) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   if (!user) {
@@ -53,7 +62,20 @@ const Navigation: React.FC<NavigationProps> = ({ user, onLogout }) => {
         </div>
         <ul className="nav-menu">
           <li className="nav-item">
-            <a href="#dashboard" className="nav-link">Dashboard</a>
+            <button
+              className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
+              onClick={onNavigateToHome}
+            >
+              Dashboard
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link ${currentView === 'builder' ? 'active' : ''}`}
+              onClick={onNavigateToBuilder}
+            >
+              Form Builder
+            </button>
           </li>
           <li className="nav-item">
             <a href="#forms" className="nav-link">My Forms</a>

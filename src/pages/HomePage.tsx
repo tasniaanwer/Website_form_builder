@@ -1,6 +1,10 @@
 import React from 'react';
 
-const HomePage: React.FC = () => {
+interface HomePageProps {
+  onNavigateToBuilder?: () => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({ onNavigateToBuilder }) => {
   return (
     <div className="homepage">
       {/* Hero Section */}
@@ -12,7 +16,9 @@ const HomePage: React.FC = () => {
             and connect with your audience in meaningful ways.
           </p>
           <div className="hero-buttons">
-            <button className="btn btn-large btn-primary">Start Building</button>
+            <button className="btn btn-large btn-primary" onClick={onNavigateToBuilder}>
+              Start Building
+            </button>
             <button className="btn btn-large btn-outline">View Demo</button>
           </div>
         </div>
@@ -64,7 +70,9 @@ const HomePage: React.FC = () => {
         <div className="container">
           <h2>Ready to Build Your First Custom Form?</h2>
           <p>Join thousands of companies who've already switched from generic forms.</p>
-          <button className="btn btn-large btn-primary">Get Started Free</button>
+          <button className="btn btn-large btn-primary" onClick={onNavigateToBuilder}>
+            Get Started Free
+          </button>
         </div>
       </section>
     </div>
