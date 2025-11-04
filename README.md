@@ -1,46 +1,101 @@
-# Getting Started with Create React App
+# FormCraft - Custom Form Builder Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern form builder platform that allows companies and individuals to create beautiful, customized forms with their own branding and personal touch.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🎨 **Custom Themes & Branding** - Choose from templates or create your own unique design
+- 🖱️ **Drag & Drop Builder** - Intuitive visual form builder with no coding required
+- 📊 **Real-time Analytics** - Track responses and analyze form performance
+- 🏢 **Team Collaboration** - Perfect for companies and organizations
+- 🔐 **User Authentication** - Secure login and registration system
+- 📱 **Responsive Design** - Works perfectly on all devices
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Frontend**: React with TypeScript
+- **Backend**: Node.js with Express.js
+- **Database**: MongoDB Atlas
+- **Authentication**: JWT tokens
+- **Styling**: CSS3 with modern design patterns
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+### Prerequisites
+- Node.js (v14 or higher)
+- npm or yarn
+- MongoDB Atlas connection
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Installation
 
-### `npm run build`
+1. Clone the repository:
+```bash
+git clone https://github.com/tasniaanwer/Website_form_builder.git
+cd Website_form_builder
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. Install frontend dependencies:
+```bash
+npm install
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Set up the backend:
+```bash
+cd server
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+4. Configure environment variables:
+Create a `.env` file in the `server` directory:
+```
+PORT=5001
+MONGODB_URI=mongodb+srv://your-connection-string
+JWT_SECRET=your-jwt-secret-key
+NODE_ENV=development
+```
 
-### `npm run eject`
+### Running the Application
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+1. Start the backend server:
+```bash
+cd server
+node index.js
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. Start the frontend development server:
+```bash
+npm start
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+3. Open your browser and navigate to:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5001
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Usage
 
-## Learn More
+1. **Create Account**: Sign up with your email and password
+2. **Login**: Access your dashboard
+3. **Build Forms**: Use the drag-and-drop interface to create custom forms
+4. **Customize**: Add your branding, colors, and personal touch
+5. **Share**: Deploy your forms and collect responses
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## API Endpoints
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Authentication
+- `POST /api/users/register` - User registration
+- `POST /api/users/login` - User login
+- `GET /api/users/me` - Get current user
+- `PUT /api/users/profile` - Update user profile
+
+### Companies
+- `POST /api/companies/` - Create company
+- `GET /api/companies/:id` - Get company details
+- `POST /api/companies/:id/invite` - Invite team members
+
+## Contributing
+
+This is a personal project by [tasniaanwer](https://github.com/tasniaanwer).
+
+## License
+
+© 2024 FormCraft. All rights reserved.
