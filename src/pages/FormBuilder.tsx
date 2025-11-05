@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './FormBuilder.css';
+import { apiEndpoints, getAuthHeaders } from '../utils/api';
 
 interface FormField {
   id: string;
@@ -15,6 +16,10 @@ const FormBuilder: React.FC = () => {
   const [formTitle, setFormTitle] = useState('Untitled Form');
   const [formDescription, setFormDescription] = useState('');
   const [selectedField, setSelectedField] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [shareableLink, setShareableLink] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
 
   const fieldTypes = [
     { type: 'text', label: 'Text Input', icon: '📝' },
@@ -27,6 +32,115 @@ const FormBuilder: React.FC = () => {
     { type: 'date', label: 'Date', icon: '📅' },
     { type: 'file', label: 'File Upload', icon: '📎' },
   ];
+
+  // Helper function to render field preview in the form canvas
+  const renderFieldPreview = (field: FormField) => {
+    const commonProps = {
+      placeholder: field.placeholder,
+      disabled: true,
+      style: { backgroundColor: '#f8f9fa' }
+    };
+
+    switch (field.type) {
+      case 'text':
+      case 'email':
+      case 'number':
+        return <input type={field.type} {...commonProps} />;
+      case 'textarea':
+        return <textarea {...commonProps} rows={2} readOnly />;
+      case 'select':
+        return (
+          <select {...commonProps} disabled>
+            <option value="">Select an option</option>
+            {field.options?.map((option, index) => (
+              <option key={index} value={option}>{option}</option>
+            ))}
+          </select>
+        );
+      case 'radio':
+        return (
+          <div className="radio-group">
+            {field.options?.map((option, index) => (
+              <label key={index} className="radio-label">
+                <input type="radio" name={field.id} value={option} disabled />
+                {option}
+              </label>
+            ))}
+          </div>
+        );
+      case 'checkbox':
+        return (
+          <div className="checkbox-group">
+            {field.options?.map((option, index) => (
+              <label key={index} className="checkbox-label">
+                <input type="checkbox" value={option} disabled />
+                {option}
+              </label>
+            ))}
+          </div>
+        );
+      case 'date':
+        return <input type="date" {...commonProps} disabled />;
+      case 'file':
+        return <input type="file" {...commonProps} disabled />;
+      default:
+        return <input type="text" {...commonProps} disabled />;
+    }
+  };
+
+  // Helper function to render field in preview modal
+  const renderPreviewField = (field: FormField) => {
+    const commonProps = {
+      placeholder: field.placeholder,
+      required: field.required
+    };
+
+    switch (field.type) {
+      case 'text':
+      case 'email':
+      case 'number':
+        return <input type={field.type} {...commonProps} />;
+      case 'textarea':
+        return <textarea {...commonProps} rows={3} />;
+      case 'select':
+        return (
+          <select {...commonProps}>
+            <option value="">Select an option</option>
+            {field.options?.map((option, index) => (
+              <option key={index} value={option}>{option}</option>
+            ))}
+          </select>
+        );
+      case 'radio':
+        return (
+          <div className="radio-group">
+            {field.options?.map((option, index) => (
+              <label key={index} className="radio-label">
+                <input type="radio" name={field.id} value={option} />
+                {option}
+              </label>
+            ))}
+          </div>
+        );
+      case 'checkbox':
+        return (
+          <div className="checkbox-group">
+            {field.options?.map((option, index) => (
+              <label key={index} className="checkbox-label">
+                <input type="checkbox" value={option} />
+                {option}
+              </label>
+            ))}
+          </div>
+        );
+      case 'date':
+        return <input type="date" {...commonProps} />;
+      case 'file':
+        return <input type="file" {...commonProps} />;
+      default:
+        return <input type="text" {...commonProps} />;
+    }
+  };
 
   const addField = (type: string) => {
     const newField: FormField = {
@@ -93,6 +207,70 @@ const FormBuilder: React.FC = () => {
 
   const selectedFieldData = formFields.find(field => field.id === selectedField);
 
+  const saveForm = async () => {
+    if (formFields.length === 0) {
+      setSaveMessage('Please add at least one field to your form');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveMessage('');
+    setShareableLink('');
+
+    try {
+      const formData = {
+        title: formTitle,
+        description: formDescription,
+        fields: formFields
+      };
+
+      const response = await fetch(apiEndpoints.forms.create, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to save form');
+      }
+
+      // Generate shareable link
+      const formLink = `${window.location.origin}/form/${data._id}`;
+      setShareableLink(formLink);
+      setSaveMessage(`Form "${formTitle}" saved successfully!`);
+
+      // Copy link to clipboard automatically
+      await navigator.clipboard.writeText(formLink);
+
+    } catch (error: any) {
+      setSaveMessage(`Error: ${error.message}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setSaveMessage('Link copied to clipboard!');
+      setTimeout(() => setSaveMessage(''), 2000);
+    } catch (error) {
+      setSaveMessage('Failed to copy link');
+      setTimeout(() => setSaveMessage(''), 2000);
+    }
+  };
+
+  const handlePreview = () => {
+    setShowPreview(true);
+  };
+
+  const closePreview = () => {
+    setShowPreview(false);
+  };
+
   return (
     <div className="form-builder">
       <div className="builder-header">
@@ -113,8 +291,21 @@ const FormBuilder: React.FC = () => {
           />
         </div>
         <div className="builder-actions">
-          <button className="btn btn-outline">Preview</button>
-          <button className="btn btn-primary">Save Form</button>
+          {saveMessage && (
+            <div className={`save-message ${saveMessage.includes('Error') ? 'error' : 'success'}`}>
+              {saveMessage}
+            </div>
+          )}
+          <button className="btn btn-outline" onClick={handlePreview}>
+            Preview
+          </button>
+          <button
+            className={`btn btn-primary ${isSaving ? 'btn-loading' : ''}`}
+            onClick={saveForm}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Form'}
+          </button>
         </div>
       </div>
 
@@ -270,61 +461,81 @@ const FormBuilder: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Shareable Link Modal */}
+      {shareableLink && (
+        <div className="modal-overlay" onClick={() => setShareableLink('')}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>🎉 Form Saved Successfully!</h3>
+              <button className="modal-close" onClick={() => setShareableLink('')}>×</button>
+            </div>
+            <div className="modal-body">
+              <p>Your form "<strong>{formTitle}</strong>" has been saved successfully.</p>
+              <p><strong>Share this link with your audience:</strong></p>
+              <div className="share-link-container">
+                <div className="success-link">{shareableLink}</div>
+                <button
+                  className="copy-btn"
+                  onClick={() => copyToClipboard(shareableLink)}
+                >
+                  Copy Link
+                </button>
+              </div>
+              <div className="modal-actions">
+                <button className="btn btn-outline" onClick={() => setShareableLink('')}>
+                  Close
+                </button>
+                <button className="btn btn-primary" onClick={handlePreview}>
+                  Preview Form
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="modal-overlay" onClick={closePreview}>
+          <div className="modal-content preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>📋 Form Preview</h3>
+              <button className="modal-close" onClick={closePreview}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="preview-form-container">
+                <h2>{formTitle}</h2>
+                {formDescription && <p>{formDescription}</p>}
+                <form className="preview-form">
+                  {formFields.map((field) => (
+                    <div key={field.id} className="preview-field">
+                      <label>
+                        {field.label}
+                        {field.required && <span className="required">*</span>}
+                      </label>
+                      {renderPreviewField(field)}
+                    </div>
+                  ))}
+                  <button type="submit" className="btn btn-primary">
+                    Submit Form
+                  </button>
+                </form>
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={closePreview}>
+                Close Preview
+              </button>
+              <button className="btn btn-primary" onClick={saveForm}>
+                Save Form
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-const renderFieldPreview = (field: FormField) => {
-  const commonProps = {
-    placeholder: field.placeholder,
-    required: field.required
-  };
-
-  switch (field.type) {
-    case 'text':
-    case 'email':
-    case 'number':
-      return <input type={field.type} {...commonProps} />;
-    case 'textarea':
-      return <textarea {...commonProps} rows={3} />;
-    case 'select':
-      return (
-        <select {...commonProps}>
-          <option value="">Select an option</option>
-          {field.options?.map((option, index) => (
-            <option key={index} value={option}>{option}</option>
-          ))}
-        </select>
-      );
-    case 'radio':
-      return (
-        <div className="radio-group">
-          {field.options?.map((option, index) => (
-            <label key={index} className="radio-label">
-              <input type="radio" name={field.id} value={option} />
-              {option}
-            </label>
-          ))}
-        </div>
-      );
-    case 'checkbox':
-      return (
-        <div className="checkbox-group">
-          {field.options?.map((option, index) => (
-            <label key={index} className="checkbox-label">
-              <input type="checkbox" value={option} />
-              {option}
-            </label>
-          ))}
-        </div>
-      );
-    case 'date':
-      return <input type="date" {...commonProps} />;
-    case 'file':
-      return <input type="file" {...commonProps} />;
-    default:
-      return <input type="text" {...commonProps} />;
-  }
 };
 
 export default FormBuilder;

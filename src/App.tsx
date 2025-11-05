@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
-import Navigation from './components/Navigation';
-import HomePage from './pages/HomePage';
-import FormBuilder from './pages/FormBuilder';
-import Auth from './components/Auth';
+import AppContent from './AppContent';
 import { isAuthenticated, getUser } from './utils/auth';
 
 interface User {
@@ -21,35 +19,33 @@ interface User {
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<'home' | 'builder'>('home');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is authenticated on app load
-    if (isAuthenticated()) {
-      const userData = getUser();
-      setUser(userData);
+    try {
+      if (isAuthenticated()) {
+        const userData = getUser();
+        if (userData) {
+          setUser(userData);
+        }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   const handleAuthSuccess = (userData: User, token: string) => {
     setUser(userData);
+    // Immediate redirect - no additional loading states
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    setCurrentView('home');
-  };
-
-  const navigateToBuilder = () => {
-    setCurrentView('builder');
-  };
-
-  const navigateToHome = () => {
-    setCurrentView('home');
   };
 
   if (loading) {
@@ -57,22 +53,13 @@ function App() {
   }
 
   return (
-    <div className="App">
-      {user ? (
-        <>
-          <Navigation
-            user={user}
-            onLogout={handleLogout}
-            onNavigateToBuilder={navigateToBuilder}
-            onNavigateToHome={navigateToHome}
-            currentView={currentView}
-          />
-          {currentView === 'home' ? <HomePage onNavigateToBuilder={navigateToBuilder} /> : <FormBuilder />}
-        </>
-      ) : (
-        <Auth onAuthSuccess={handleAuthSuccess} />
-      )}
-    </div>
+    <Router>
+      <AppContent
+        user={user}
+        onLogout={handleLogout}
+        onAuthSuccess={handleAuthSuccess}
+      />
+    </Router>
   );
 }
 

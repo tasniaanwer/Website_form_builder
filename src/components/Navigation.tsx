@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 interface NavigationProps {
   user?: {
@@ -11,7 +12,8 @@ interface NavigationProps {
   onLogout?: () => void;
   onNavigateToBuilder?: () => void;
   onNavigateToHome?: () => void;
-  currentView?: 'home' | 'builder';
+  onNavigateToMyForms?: () => void;
+  onNavigateToTemplates?: () => void;
 }
 
 const Navigation: React.FC<NavigationProps> = ({
@@ -19,9 +21,11 @@ const Navigation: React.FC<NavigationProps> = ({
   onLogout,
   onNavigateToBuilder,
   onNavigateToHome,
-  currentView
+  onNavigateToMyForms,
+  onNavigateToTemplates
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const location = useLocation();
 
   if (!user) {
     // Public navigation for non-authenticated users
@@ -63,7 +67,7 @@ const Navigation: React.FC<NavigationProps> = ({
         <ul className="nav-menu">
           <li className="nav-item">
             <button
-              className={`nav-link ${currentView === 'home' ? 'active' : ''}`}
+              className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
               onClick={onNavigateToHome}
             >
               Dashboard
@@ -71,17 +75,27 @@ const Navigation: React.FC<NavigationProps> = ({
           </li>
           <li className="nav-item">
             <button
-              className={`nav-link ${currentView === 'builder' ? 'active' : ''}`}
+              className={`nav-link ${location.pathname === '/forms' ? 'active' : ''}`}
+              onClick={onNavigateToMyForms}
+            >
+              My Forms
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link ${location.pathname === '/templates' ? 'active' : ''}`}
+              onClick={onNavigateToTemplates}
+            >
+              Templates
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link ${location.pathname === '/builder' ? 'active' : ''}`}
               onClick={onNavigateToBuilder}
             >
               Form Builder
             </button>
-          </li>
-          <li className="nav-item">
-            <a href="#forms" className="nav-link">My Forms</a>
-          </li>
-          <li className="nav-item">
-            <a href="#templates" className="nav-link">Templates</a>
           </li>
           {user.company && (
             <li className="nav-item">
@@ -120,4 +134,4 @@ const Navigation: React.FC<NavigationProps> = ({
   );
 };
 
-export default Navigation;
+export default React.memo(Navigation);

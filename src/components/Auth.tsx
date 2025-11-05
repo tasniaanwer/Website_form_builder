@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Auth.css';
+import { apiEndpoints } from '../utils/api';
 
 interface AuthProps {
   onAuthSuccess: (user: any, token: string) => void;
@@ -27,13 +28,13 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     setLoading(true);
     setError('');
 
-    const url = isLogin ? '/api/users/login' : '/api/users/register';
+    const url = isLogin ? apiEndpoints.auth.login : apiEndpoints.auth.register;
     const payload = isLogin
       ? { email: formData.email, password: formData.password }
       : formData;
 
     try {
-      const response = await fetch(`http://localhost:5001${url}`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -134,4 +135,4 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   );
 };
 
-export default Auth;
+export default React.memo(Auth);

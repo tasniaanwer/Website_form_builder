@@ -79,4 +79,4 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigateToBuilder }) => {
   );
 };
 
-export default HomePage;
+export default React.memo(HomePage);
